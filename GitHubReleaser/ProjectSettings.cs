@@ -32,7 +32,7 @@ namespace GitHubReleaser
 		{
 			public LibationSettings() : base("Libation")
 			{
-				GitDirectory = Path.Combine(SECRETS.VS2022ProjectsDirectory, Name);
+				GitDirectory = Path.Combine(SECRETS.VS2022ProjectsDirectory, Name, "Source");
 
 				ProjectWithVersion = Path.Combine(GitDirectory, @"AppScaffolding\AppScaffolding.csproj");
 				Solution = Path.Combine(GitDirectory, "Libation.sln");
