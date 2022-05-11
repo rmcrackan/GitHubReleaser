@@ -13,6 +13,7 @@ namespace GitHubReleaser
 
 		public string Name => DisplayName;
 		public string GitDirectory { get; init; }
+		public string SourceDirectory { get; init; }
 
 		public string ProjectWithVersion { get; init; }
 		public string Solution { get; init; }
@@ -32,12 +33,13 @@ namespace GitHubReleaser
 		{
 			public LibationSettings() : base("Libation")
 			{
-				GitDirectory = Path.Combine(SECRETS.VS2022ProjectsDirectory, Name, "Source");
+				GitDirectory = Path.Combine(SECRETS.VS2022ProjectsDirectory, Name);
+				SourceDirectory = Path.Combine(GitDirectory, "Source");
 
-				ProjectWithVersion = Path.Combine(GitDirectory, @"AppScaffolding\AppScaffolding.csproj");
-				Solution = Path.Combine(GitDirectory, "Libation.sln");
-				ReleaseDirectory = Path.Combine(GitDirectory, @"LibationWinForms\bin\Release");
-				VersionDirectory = Path.Combine(GitDirectory, @"LibationWinForms\bin\Libation."); // final dot IS intentional
+				ProjectWithVersion = Path.Combine(SourceDirectory, @"AppScaffolding\AppScaffolding.csproj");
+				Solution = Path.Combine(SourceDirectory, "Libation.sln");
+				ReleaseDirectory = Path.Combine(SourceDirectory, @"LibationWinForms\bin\Release");
+				VersionDirectory = Path.Combine(SourceDirectory, @"LibationWinForms\bin\Libation."); // final dot IS intentional
 
 				Footer =
 					"\r\n\r\n" +
@@ -64,11 +66,12 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 			public XstitchXcelSettings() : base("XstitchXcel")
 			{
 				GitDirectory = Path.Combine(SECRETS.VS2022ProjectsDirectory, Name);
+				SourceDirectory = GitDirectory;
 
-				ProjectWithVersion = Path.Combine(GitDirectory, @"XstitchXcel\XstitchXcel.csproj");
-				Solution = Path.Combine(GitDirectory, "XstitchXcel.sln");
-				ReleaseDirectory = Path.Combine(GitDirectory, @"XstitchXcel\bin\Release");
-				VersionDirectory = Path.Combine(GitDirectory, @"XstitchXcel\bin\XstitchXcel."); // final dot IS intentional
+				ProjectWithVersion = Path.Combine(SourceDirectory, @"XstitchXcel\XstitchXcel.csproj");
+				Solution = Path.Combine(SourceDirectory, "XstitchXcel.sln");
+				ReleaseDirectory = Path.Combine(SourceDirectory, @"XstitchXcel\bin\Release");
+				VersionDirectory = Path.Combine(SourceDirectory, @"XstitchXcel\bin\XstitchXcel."); // final dot IS intentional
 
 				Footer =
 					"\r\n\r\n" +
