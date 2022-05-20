@@ -168,8 +168,18 @@ namespace GitHubReleaser
 
 			if (versionCanRelease)
 			{
+				// eg: 1.0.0 , 1.2.0 , 1.2.3
 				finalVersionTb.Text = $"v{current3}";
-				finalTitleTb.Text = $"{selectedProject.Name} {current3}";
+
+				var v3 = current3.ToString();
+				while (v3.EndsWith(".0"))
+                {
+					// remove final 2 char
+					v3 = v3[..^2];
+				}
+
+				// eg: 1 , 1.2 , 1.2.3
+				finalTitleTb.Text = $"{selectedProject.Name} {v3}";
 			}
 		}
 
