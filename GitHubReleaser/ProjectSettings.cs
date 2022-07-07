@@ -38,8 +38,8 @@ namespace GitHubReleaser
 
 				ProjectWithVersion = Path.Combine(SourceDirectory, @"AppScaffolding\AppScaffolding.csproj");
 				Solution = Path.Combine(SourceDirectory, "Libation.sln");
-				ReleaseDirectory = Path.Combine(SourceDirectory, @"LibationWinForms\bin\Release");
-				VersionDirectory = Path.Combine(SourceDirectory, @"LibationWinForms\bin\Libation."); // final dot IS intentional
+				ReleaseDirectory = Path.Combine(SourceDirectory, @"bin\Release");
+				VersionDirectory = Path.Combine(SourceDirectory, @"bin\Libation."); // final dot IS intentional
 
 				Footer =
 					"\r\n\r\n" +
