@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Dinah.Core;
+using Dinah.Core.Processes;
 
 namespace GitHubReleaser
 {
-    public class ProjectSettings : Enumeration<ProjectSettings>
+    public abstract class ProjectSettings : Enumeration<ProjectSettings>
 	{
 		public static ProjectSettings Libation { get; } = new LibationSettings();
 		public static ProjectSettings XstitchXcel { get; } = new XstitchXcelSettings();
@@ -27,6 +30,12 @@ namespace GitHubReleaser
 		private static int i = 0;
 		public ProjectSettings(string displayName) : base(i++, displayName) { }
 
+		public abstract Task BuildAsync();
+		private async Task BuildSolutionAsync()
+			=> await ProcessRunner.RunHiddenAsync(
+				@"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe",
+				$@"  ""{Solution}"" /build ""Release|AnyCPU""  ".Trim());
+
 		public override string ToString() => Name;
 
         private class LibationSettings : ProjectSettings
@@ -38,7 +47,14 @@ namespace GitHubReleaser
 
 				ProjectWithVersion = Path.Combine(SourceDirectory, @"AppScaffolding\AppScaffolding.csproj");
 				Solution = Path.Combine(SourceDirectory, "Libation.sln");
-				ReleaseDirectory = Path.Combine(SourceDirectory, @"bin\Release");
+				/*
+				per FolderProfile.pubxml in EACH PROJECT
+				<Project>
+				  <PropertyGroup>
+				    <PublishDir>..\bin\publish\</PublishDir>
+				publishes to: C:\Dropbox\DinahsFolder\coding\_NET\Visual Studio 2022\Libation\Source\bin\publish
+				 */
+				ReleaseDirectory = Path.Combine(SourceDirectory, @"bin\publish");
 				VersionDirectory = Path.Combine(SourceDirectory, @"bin\Libation."); // final dot IS intentional
 
 				Footer =
@@ -56,10 +72,24 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 					return
                         File.Exists(exe) &&
                         Directory.Exists(spanishDir) &&
-                        Directory.EnumerateFiles(spanishDir).Count() > 16;
+                        Directory.EnumerateFiles(spanishDir).Count() > 0;
 				};
 			}
-		}
+
+            public override async Task BuildAsync()
+			{
+				var projects = new[] { "LibationWinForms", "LibationCli", "Hangover" };
+				foreach (var project in projects)
+				{
+					await ProcessRunner.RunHiddenAsync(new ProcessStartInfo
+					{
+						FileName = "dotnet",
+						WorkingDirectory = SourceDirectory,
+						Arguments = $@"publish -c Release {project}\{project}.csproj -p:PublishProfile={project}\Properties\PublishProfiles\FolderProfile.pubxml",
+					});
+				}
+			}
+        }
 
 		private class XstitchXcelSettings : ProjectSettings
 		{
@@ -93,6 +123,8 @@ As long as I'm maintaining this software, it will remain free and open source., 
                         Directory.EnumerateFiles(spanishDir).Count() > 16;
 				};
 			}
-		}
+
+			public override Task BuildAsync() => BuildSolutionAsync();
+        }
 	}
 }

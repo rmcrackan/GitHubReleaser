@@ -230,9 +230,7 @@ namespace GitHubReleaser
 		private async Task<bool> buildRelease()
 		{
 			var start = DateTime.Now;
-			await ProcessRunner.RunHiddenAsync(
-				@"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe",
-				$@"  ""{selectedProject.Solution}"" /build ""Release|AnyCPU""  ".Trim());
+			await selectedProject.BuildAsync();
 
 			// overkill. should take < 30 sec
 			var _2_minute_Timeout = new TimeSpan(0, 2, 0);
