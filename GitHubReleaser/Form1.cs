@@ -277,7 +277,7 @@ namespace GitHubReleaser
 		#endregion Tab: Build Release
 
 		#region Tab: Latest commits
-		private void LatestCommitsTab_VisibleChanged(object sender, EventArgs e)
+		private async void LatestCommitsTab_VisibleChanged(object sender, EventArgs e)
 		{
 			if (!latestCommitsTab.Visible)
 				return;
@@ -288,13 +288,48 @@ namespace GitHubReleaser
 			var latestTag = git.GetLatestTag();
 
 			tagLbl.Text = latestTag;
-			var commits = git.GetCommitsSinceTag(latestTag);
 
-			if (commits.Any())
-				finalBodyTb.Text = commits.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-					.Select(s => $"* {s}")
-					.Aggregate((a, b) => $"{a}\r\n{b}")
-					+ selectedProject.Footer;
+			finalBodyTb.Clear();
+
+			{
+				var commitMessages = git.GetCommitsSinceTag(latestTag);
+
+				if (commitMessages.Any())
+					finalBodyTb.AppendText(commitMessages.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+						.Select(s => $"* {s}")
+						.Aggregate((a, b) => $"{a}\r\n{b}"));
+			}
+
+			{
+				var contributors = new List<string>();
+				//   git log <yourlasttag>..HEAD
+				// %H == commit hash. https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History
+				var commitHashes = git.RunGitCommand($"git log --pretty=%H {latestTag}..HEAD").Output;
+				foreach (var hash in commitHashes.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					var commit = await this.gitHubClient.Repository.Commit.Get(repoId, hash);
+					var name = commit?.Author?.Login ?? commit?.Commit?.Committer?.Name;
+					if (name is not null)
+					{
+						if (!name.Trim().EqualsInsensitive("Robert McRackan") &&
+							!name.Trim().EqualsInsensitive("rmcrackan") &&
+							!contributors.Contains(name))
+							contributors.Add(name);
+					}
+				}
+
+				if (contributors.Any())
+                {
+					finalBodyTb.AppendText("\r\n\r\nThanks to " +
+						contributors
+						.Select(s => $"@{s}")
+						.Aggregate((a, b) => $"{a}, {b}"));
+				}
+			}
+
+			{
+				finalBodyTb.AppendText(selectedProject.Footer);
+			}
 		}
 		#endregion
 
