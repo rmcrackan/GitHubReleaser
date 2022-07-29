@@ -16,7 +16,7 @@ namespace GitHubReleaser
 		private WindowsService dropboxWindowsService { get; } = new WindowsService("DbxSvc");
 		private WindowsProgram dropboxDesktop { get; } = new WindowsProgram(@"C:\Program Files (x86)\Dropbox\Client\Dropbox.exe");
 
-		Octokit.GitHubClient gitHubClient;
+		Octokit.IRepositoriesClient gitHubRepository;
 		long repoId;
 
 		List<string> _gitStatuses = new();
@@ -94,9 +94,9 @@ namespace GitHubReleaser
 
 			git = new(new DirectoryInfo(selectedProject.GitDirectory));
 
-            gitHubClient = new(new Octokit.ProductHeaderValue($"{selectedProject.Name}_Releaser")) { Credentials = new(SECRETS.GithubApiToken) };
+			gitHubRepository = new Octokit.GitHubClient(new Octokit.ProductHeaderValue($"{selectedProject.Name}_Releaser")) { Credentials = new(SECRETS.GithubApiToken) }.Repository;
 
-            var repo = await gitHubClient.Repository.Get("rmcrackan", selectedProject.Name);
+            var repo = await gitHubRepository.Get("rmcrackan", selectedProject.Name);
             repoId = repo.Id;
         }
 
@@ -186,7 +186,7 @@ namespace GitHubReleaser
 		private async Task<Version> getLastPublishedVersionAsync()
 		{
 			// https://octokitnet.readthedocs.io/en/latest/releases/
-			var releases = await gitHubClient.Repository.Release.GetAll("rmcrackan", selectedProject.Name);
+			var releases = await gitHubRepository.Release.GetAll("rmcrackan", selectedProject.Name);
 			var latest = releases.First(r => !r.Draft && !r.Prerelease);
 			var latestVersionString = latest.TagName.Trim('v');
 			return Version.Parse(latestVersionString);
@@ -208,73 +208,6 @@ namespace GitHubReleaser
 			currVersionValueLbl.Text = $"{current}";
 		}
 		#endregion
-
-		#region Tab: Build Release
-		private async void buildReleaseBtn_Click(object sender, EventArgs e)
-		{
-			if (string.IsNullOrWhiteSpace(finalVersionTb.Text))
-			{
-				MessageBox.Show("Must have version #");
-				return;
-			}
-
-			var success = await buildRelease();
-			if (!success)
-				throw new Exception("Build release timed out");
-
-			var verDir = renameReleaseDir(finalVersionTb.Text.Trim('v'));
-
-			zipRelease(verDir);
-		}
-
-		private async Task<bool> buildRelease()
-		{
-			var start = DateTime.Now;
-			await selectedProject.BuildAsync();
-
-			// overkill. should take < 30 sec
-			var _2_minute_Timeout = new TimeSpan(0, 2, 0);
-			while (true)
-			{
-				if (DateTime.Now - start > _2_minute_Timeout)
-					return false;
-
-				if (selectedProject.ReleaseIsComplete())
-				{
-					var ts_debug = DateTime.Now - start;
-					var ts_str_debug = $"{ts_debug}";
-
-					// again: overkill
-					await Task.Delay(100);
-					return true;
-				}
-
-				await Task.Delay(100);
-			}
-		}
-
-		private string renameReleaseDir(string ver)
-		{
-			var verDir = $"{selectedProject.VersionDirectory}{ver}";
-			if (Directory.Exists(verDir))
-				throw new Exception($"Directory already exists:\r\n{verDir}");
-            Directory.Move(selectedProject.ReleaseDirectory, verDir);
-			System.Threading.Thread.Sleep(100);
-			return verDir;
-		}
-
-		private void zipRelease(string verDir)
-		{
-			var zip = verDir.Trim('\\') + ".zip";
-
-			System.IO.Compression.ZipFile.CreateFromDirectory(verDir, zip);
-			System.Threading.Thread.Sleep(100);
-			finalZipTb.Text = zip;
-
-            Directory.Delete(verDir, true);
-			System.Threading.Thread.Sleep(100);
-		}
-		#endregion Tab: Build Release
 
 		#region Tab: Latest commits
 		private async void LatestCommitsTab_VisibleChanged(object sender, EventArgs e)
@@ -307,7 +240,7 @@ namespace GitHubReleaser
 				var commitHashes = git.RunGitCommand($"git log --pretty=%H {latestTag}..HEAD").Output;
 				foreach (var hash in commitHashes.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
 				{
-					var commit = await this.gitHubClient.Repository.Commit.Get(repoId, hash);
+					var commit = await gitHubRepository.Commit.Get(repoId, hash);
 					var name = commit?.Author?.Login ?? commit?.Commit?.Committer?.Name;
 					if (name is not null)
 					{
@@ -333,15 +266,71 @@ namespace GitHubReleaser
 		}
 		#endregion
 
+		List<string> zipFiles = new();
+
+		#region Tab: Build Release
+		private async void buildReleaseBtn_Click(object sender, EventArgs e)
+		{
+			if (string.IsNullOrWhiteSpace(finalVersionTb.Text))
+			{
+				MessageBox.Show("Must have version #");
+				return;
+			}
+
+			var success = await buildRelease();
+			if (!success)
+				throw new Exception("Build release timed out");
+
+			var ver = finalVersionTb.Text.Trim('v');
+			var verDirs = selectedProject.RenameReleaseDirectories(ver).ToList();
+
+			zipRelease(verDirs);
+		}
+
+		private async Task<bool> buildRelease()
+		{
+			var start = DateTime.Now;
+			await selectedProject.BuildAsync();
+
+			// overkill. should take < 30 sec
+			var _2_minute_Timeout = new TimeSpan(0, 2, 0);
+			while (true)
+			{
+				if (selectedProject.ReleaseIsComplete())
+					return true;
+
+				if (DateTime.Now - start > _2_minute_Timeout)
+					return false;
+
+				await Task.Delay(100);
+			}
+		}
+
+		private void zipRelease(List<string> verDirs)
+        {
+			zipFiles.Clear();
+
+			foreach (var verDir in verDirs)
+			{
+				var zip = verDir.Trim('\\') + ".zip";
+
+				System.IO.Compression.ZipFile.CreateFromDirectory(verDir, zip);
+				zipFiles.Add(zip);
+
+				Directory.Delete(verDir, true);
+			}
+
+			finalZipTb.Text = zipFiles.Aggregate((a, b) => $"{a}\r\n{b}");
+		}
+		#endregion Tab: Build Release
+
 		#region Tab: Publish to github
 		private async void publishBtn_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrWhiteSpace(finalVersionTb.Text)) throw new Exception(nameof(finalVersionTb));
-			if (string.IsNullOrWhiteSpace(finalTitleTb.Text)) throw new Exception(nameof(finalTitleTb));
-			if (string.IsNullOrWhiteSpace(finalBodyTb.Text)) throw new Exception(nameof(finalBodyTb));
-			if (string.IsNullOrWhiteSpace(finalZipTb.Text)) throw new Exception(nameof(finalZipTb));
-
-			var client = gitHubClient;
+			ArgumentValidator.EnsureNotNullOrWhiteSpace(finalVersionTb.Text, nameof(finalVersionTb));
+			ArgumentValidator.EnsureNotNullOrWhiteSpace(finalTitleTb.Text, nameof(finalTitleTb));
+			ArgumentValidator.EnsureNotNullOrWhiteSpace(finalBodyTb.Text, nameof(finalBodyTb));
+			if (!zipFiles.Any()) throw new Exception(nameof(zipFiles));
 
 			finalVersionTb.Text = finalVersionTb.Text.Trim();
 			finalTitleTb.Text = finalTitleTb.Text.Trim();
@@ -358,26 +347,31 @@ namespace GitHubReleaser
 				Body = finalBodyTb.Text,
 				Draft = true
 			};
-			var release = await client.Repository.Release.Create(repoId, newRelease);
+			var release = await gitHubRepository.Release.Create(repoId, newRelease);
 
-			var zipPath = finalZipTb.Text;
+			// upload IN ORDER. don't do something clever which doesn't guarantee order
+			foreach (var zipPath in zipFiles)
+				await uploadZipAsync(release, zipPath);
+		}
+
+		private async Task uploadZipAsync(Octokit.Release release, string zipPath)
+		{
 			var zipFileName = Path.GetFileName(zipPath);
 
 			using var archiveContents = File.OpenRead(zipPath);
-            var assetUpload = new Octokit.ReleaseAssetUpload()
+			var assetUpload = new Octokit.ReleaseAssetUpload()
 			{
-                FileName = zipFileName,
-                ContentType = "application/zip",
-                RawData = archiveContents
+				FileName = zipFileName,
+				ContentType = "application/zip",
+				RawData = archiveContents
 			};
-            var asset = await client.Repository.Release.UploadAsset(release, assetUpload);
+			var asset = await gitHubRepository.Release.UploadAsset(release, assetUpload);
 
-            var updateRelease = release.ToUpdate();
+			var updateRelease = release.ToUpdate();
 			updateRelease.Draft = false;
-			var updateResult = await client.Repository.Release.Edit(repoId, release.Id, updateRelease);
+			var updateResult = await gitHubRepository.Release.Edit(repoId, release.Id, updateRelease);
 
-			await Task.Delay(100);
-            File.Delete(zipPath);
+			File.Delete(zipPath);
 		}
 		#endregion
 
