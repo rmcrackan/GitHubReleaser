@@ -89,9 +89,9 @@ namespace GitHubReleaser
 	}
 	static class ReleaseExtensions
     {
-		public static string BinPublish = @"bin\Publish";
+		public const string BIN_PUBLISH = @"bin\Publish";
 
-		public static string GetPublishDirRelative(this Release release) => Path.Combine(BinPublish, $@"{release.OS.Abbrev}-{release.LibationExe.Name}");
+		public static string GetPublishDirRelative(this Release release) => Path.Combine(BIN_PUBLISH, $@"{release.OS.Abbrev}-{release.LibationExe.Name}");
 
 		public static string GetZipDir(this Release release) => $@"{release.BuildPrefix}Libation.#.#.#-{release.OS.Abbrev}-{release.LibationExe.Name}";
 	}
@@ -183,7 +183,7 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 				var source = Path.Combine(SourceDirectory, r.GetPublishDirRelative());
 
 				var destDir = r.GetZipDir().Replace("#.#.#", ver);
-				var dest = Path.Combine(SourceDirectory, ReleaseExtensions.BinPublish, destDir);
+				var dest = Path.Combine(SourceDirectory, ReleaseExtensions.BIN_PUBLISH, destDir);
 
 				RenameDir(source, dest);
 
