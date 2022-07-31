@@ -9,15 +9,6 @@ using Dinah.Core.Processes;
 
 namespace GitHubReleaser
 {
-	// from: AppScaffolding.LibationScaffolding.ReleaseIdentifier
-	enum ReleaseIdentifier
-	{
-		WindowsClassic,
-		WindowsAvalonia,
-		LinuxAvalonia,
-		MacOSAvalonia
-	}
-
 	public abstract class LibationExe : Enumeration<LibationExe>
 	{
 		public static LibationExe Classic { get; } = new ClassicExe();
@@ -36,8 +27,6 @@ namespace GitHubReleaser
 		private class ClassicExe : LibationExe { public ClassicExe() : base("classic", "LibationWinForms") { } }
 		private class ChardonnayExe : LibationExe { public ChardonnayExe() : base("chardonnay", "LibationAvalonia") { } }
 	}
-
-	enum DotnetAction { build, publish }
 
 	enum Project { LibationCli, Hangover }
 
@@ -64,10 +53,8 @@ namespace GitHubReleaser
 
 	class Release
 	{
-		public ReleaseIdentifier Identifier { get; init; }
 		public OperatingSystems OS { get; init; }
 		public LibationExe LibationExe { get; init; }
-		public DotnetAction Action { get; init; } = DotnetAction.publish;
 		public string BuildPrefix { get; init; } = "";
 
 		// order matters
@@ -103,39 +90,33 @@ namespace GitHubReleaser
 		{
 			new()
 			{
-				Identifier = ReleaseIdentifier.WindowsClassic,
-
 				OS = OperatingSystems.Windows,
 				LibationExe = LibationExe.Classic,
-				Action = DotnetAction.build,
+
 				BuildPrefix = "Classic-",
 				// order matters. build hangover LAST
 				OtherProjects = new(){ Project.LibationCli, Project.Hangover },
 			},
 			new()
 			{
-				Identifier = ReleaseIdentifier.WindowsAvalonia,
-
 				OS = OperatingSystems.Windows,
 				LibationExe = LibationExe.Chardonnay,
-				Action = DotnetAction.build,
+
 				// order matters. build hangover LAST
 				OtherProjects = new(){ Project.LibationCli, Project.Hangover }
 			},
 			new()
 			{
-				Identifier = ReleaseIdentifier.LinuxAvalonia,
-
 				OS = OperatingSystems.Linux,
 				LibationExe = LibationExe.Chardonnay,
+
 				OtherProjects = new(){ Project.LibationCli }
 			},
 			new()
 			{
-				Identifier = ReleaseIdentifier.MacOSAvalonia,
-
 				OS = OperatingSystems.MacOS,
 				LibationExe = LibationExe.Chardonnay,
+
 				OtherProjects = new(){ Project.LibationCli }
 			}
 		};
@@ -157,23 +138,44 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 
 		public override async Task BuildAsync()
 		{
+			var debug = "";
 			foreach (var r in releases)
 			{
+				debug += $@"{r.OS}|{r.LibationExe}" + Environment.NewLine;
+
+				var args_release = $@"clean -c Release";
+				debug += args_release + Environment.NewLine;
+
+				await runDotNetAsync(args_release);
+
 				foreach (var project in r.Projects)
 				{
+					debug += $@"* project:{project}" + Environment.NewLine;
+
 					var csproj = $@"{project}\{project}.csproj";
 					var pubxml = $@"{project}\Properties\PublishProfiles\{r.OS.Name}Profile.pubxml";
 
-					var args = $@"{r.Action} -c Release -o {r.GetPublishDirRelative()} {csproj} -p:PublishProfile={pubxml}";
+					var args = $@"publish -c Release -o {r.GetPublishDirRelative()} {csproj} -p:PublishProfile={pubxml}";
+					debug += $@"  {args}" + Environment.NewLine;
 
-                    await ProcessRunner.RunHiddenAsync(new ProcessStartInfo
-                    {
-                        FileName = "dotnet",
-                        WorkingDirectory = SourceDirectory,
-                        Arguments = args,
-                    });
-                }
+					await runDotNetAsync(args);
+
+					debug += Environment.NewLine;
+				}
+
+				debug += Environment.NewLine;
 			}
+			var debugFinal = debug;
+		}
+
+		private async Task runDotNetAsync(string args)
+		{
+			await ProcessRunner.RunHiddenAsync(new ProcessStartInfo
+			{
+				FileName = "dotnet",
+				WorkingDirectory = SourceDirectory,
+				Arguments = args,
+			});
 		}
 
         public override IEnumerable<string> RenameReleaseDirectories(string ver)
