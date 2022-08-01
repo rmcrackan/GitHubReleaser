@@ -88,13 +88,13 @@ namespace GitHubReleaser
 		// order matters. upload classic FIRST
 		List<Release> releases { get; } = new()
 		{
+			// order matters. build hangover LAST
 			new()
 			{
 				OS = OperatingSystems.Windows,
 				LibationExe = LibationExe.Classic,
 
 				BuildPrefix = "Classic-",
-				// order matters. build hangover LAST
 				OtherProjects = new(){ Project.LibationCli, Project.Hangover },
 			},
 			new()
@@ -102,7 +102,6 @@ namespace GitHubReleaser
 				OS = OperatingSystems.Windows,
 				LibationExe = LibationExe.Chardonnay,
 
-				// order matters. build hangover LAST
 				OtherProjects = new(){ Project.LibationCli, Project.Hangover }
 			},
 			new()
@@ -110,14 +109,14 @@ namespace GitHubReleaser
 				OS = OperatingSystems.Linux,
 				LibationExe = LibationExe.Chardonnay,
 
-				OtherProjects = new(){ Project.LibationCli }
+				OtherProjects = new(){ Project.LibationCli, Project.Hangover }
 			},
 			new()
 			{
 				OS = OperatingSystems.MacOS,
 				LibationExe = LibationExe.Chardonnay,
 
-				OtherProjects = new(){ Project.LibationCli }
+				OtherProjects = new(){ Project.LibationCli, Project.Hangover }
 			}
 		};
 
