@@ -28,7 +28,7 @@ namespace GitHubReleaser
 		private class ChardonnayExe : LibationExe { public ChardonnayExe() : base("chardonnay", "LibationAvalonia") { } }
 	}
 
-	enum Project { LibationCli, Hangover }
+	enum Project { LibationCli, Hangover, HangoverAvalonia }
 
 	public abstract class OperatingSystems : Enumeration<OperatingSystems>
 	{
@@ -102,21 +102,21 @@ namespace GitHubReleaser
 				OS = OperatingSystems.Windows,
 				LibationExe = LibationExe.Chardonnay,
 
-				OtherProjects = new(){ Project.LibationCli, Project.Hangover }
+				OtherProjects = new(){ Project.LibationCli, Project.HangoverAvalonia }
 			},
 			new()
 			{
 				OS = OperatingSystems.Linux,
 				LibationExe = LibationExe.Chardonnay,
 
-				OtherProjects = new(){ Project.LibationCli, Project.Hangover }
+				OtherProjects = new(){ Project.LibationCli, Project.HangoverAvalonia }
 			},
 			new()
 			{
 				OS = OperatingSystems.MacOS,
 				LibationExe = LibationExe.Chardonnay,
 
-				OtherProjects = new(){ Project.LibationCli, Project.Hangover }
+				OtherProjects = new(){ Project.LibationCli, Project.HangoverAvalonia }
 			}
 		};
 
