@@ -136,40 +136,36 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 ".Trim();
 		}
 
+		string buildDebug;
 		public override async Task BuildAsync()
 		{
-			var debug = "";
+			buildDebug = "";
 			foreach (var r in releases)
 			{
-				debug += $@"{r.OS}|{r.LibationExe}" + Environment.NewLine;
+				buildDebug += $@"{r.OS}|{r.LibationExe}" + Environment.NewLine;
 
-				var args_release = $@"clean -c Release";
-				debug += args_release + Environment.NewLine;
-
-				await runDotNetAsync(args_release);
+				await runDotNetAsync("clean -c Release");
 
 				foreach (var project in r.Projects)
 				{
-					debug += $@"* project:{project}" + Environment.NewLine;
+					buildDebug += $"* project:{project}" + Environment.NewLine;
 
 					var csproj = $@"{project}\{project}.csproj";
 					var pubxml = $@"{project}\Properties\PublishProfiles\{r.OS.Name}Profile.pubxml";
 
-					var args = $@"publish -c Release -o {r.GetPublishDirRelative()} {csproj} -p:PublishProfile={pubxml}";
-					debug += $@"  {args}" + Environment.NewLine;
+					await runDotNetAsync($"publish -c Release -o {r.GetPublishDirRelative()} {csproj} -p:PublishProfile={pubxml}");
 
-					await runDotNetAsync(args);
-
-					debug += Environment.NewLine;
+					buildDebug += Environment.NewLine;
 				}
 
-				debug += Environment.NewLine;
+				buildDebug += Environment.NewLine;
 			}
-			var debugFinal = debug;
+			var debugFinal = buildDebug;
 		}
 
 		private async Task runDotNetAsync(string args)
 		{
+			buildDebug += $@"  {args}" + Environment.NewLine;
 			await ProcessRunner.RunHiddenAsync(new ProcessStartInfo
 			{
 				FileName = "dotnet",
