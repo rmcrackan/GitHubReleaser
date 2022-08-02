@@ -44,8 +44,10 @@ namespace GitHubReleaser
             this.tagLbl = new System.Windows.Forms.Label();
             this.latestGitTagLbl = new System.Windows.Forms.Label();
             this.buildReleaseTab = new System.Windows.Forms.TabPage();
+            this.buildReleaseOutputTb = new System.Windows.Forms.TextBox();
             this.buildReleaseBtn = new System.Windows.Forms.Button();
             this.publishToGithubTab = new System.Windows.Forms.TabPage();
+            this.publishPreReleaseCb = new System.Windows.Forms.CheckBox();
             this.publishBtn = new System.Windows.Forms.Button();
             this.restartDropboxTab = new System.Windows.Forms.TabPage();
             this.restartDropboxBtn = new System.Windows.Forms.Button();
@@ -223,6 +225,7 @@ namespace GitHubReleaser
             // 
             // buildReleaseTab
             // 
+            this.buildReleaseTab.Controls.Add(this.buildReleaseOutputTb);
             this.buildReleaseTab.Controls.Add(this.buildReleaseBtn);
             this.buildReleaseTab.Location = new System.Drawing.Point(4, 24);
             this.buildReleaseTab.Name = "buildReleaseTab";
@@ -231,6 +234,19 @@ namespace GitHubReleaser
             this.buildReleaseTab.TabIndex = 4;
             this.buildReleaseTab.Text = "Build Release";
             this.buildReleaseTab.UseVisualStyleBackColor = true;
+            // 
+            // buildReleaseOutputTb
+            // 
+            this.buildReleaseOutputTb.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.buildReleaseOutputTb.Location = new System.Drawing.Point(6, 35);
+            this.buildReleaseOutputTb.Multiline = true;
+            this.buildReleaseOutputTb.Name = "buildReleaseOutputTb";
+            this.buildReleaseOutputTb.ReadOnly = true;
+            this.buildReleaseOutputTb.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.buildReleaseOutputTb.Size = new System.Drawing.Size(415, 328);
+            this.buildReleaseOutputTb.TabIndex = 1;
             // 
             // buildReleaseBtn
             // 
@@ -244,6 +260,7 @@ namespace GitHubReleaser
             // 
             // publishToGithubTab
             // 
+            this.publishToGithubTab.Controls.Add(this.publishPreReleaseCb);
             this.publishToGithubTab.Controls.Add(this.publishBtn);
             this.publishToGithubTab.Location = new System.Drawing.Point(4, 24);
             this.publishToGithubTab.Name = "publishToGithubTab";
@@ -251,6 +268,17 @@ namespace GitHubReleaser
             this.publishToGithubTab.TabIndex = 5;
             this.publishToGithubTab.Text = "Publish to github";
             this.publishToGithubTab.UseVisualStyleBackColor = true;
+            // 
+            // publishPreReleaseCb
+            // 
+            this.publishPreReleaseCb.AutoSize = true;
+            this.publishPreReleaseCb.Location = new System.Drawing.Point(3, 35);
+            this.publishPreReleaseCb.Name = "publishPreReleaseCb";
+            this.publishPreReleaseCb.Size = new System.Drawing.Size(140, 19);
+            this.publishPreReleaseCb.TabIndex = 1;
+            this.publishPreReleaseCb.Text = "Publish as Pre-release";
+            this.publishPreReleaseCb.UseVisualStyleBackColor = true;
+            this.publishPreReleaseCb.CheckedChanged += new System.EventHandler(this.publishPreReleaseCb_CheckedChanged);
             // 
             // publishBtn
             // 
@@ -359,9 +387,11 @@ namespace GitHubReleaser
             // 
             // finalTitleTb
             // 
+            this.finalTitleTb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.finalTitleTb.Location = new System.Drawing.Point(87, 45);
             this.finalTitleTb.Name = "finalTitleTb";
-            this.finalTitleTb.Size = new System.Drawing.Size(147, 23);
+            this.finalTitleTb.Size = new System.Drawing.Size(290, 23);
             this.finalTitleTb.TabIndex = 3;
             // 
             // finalTitleLbl
@@ -422,7 +452,9 @@ namespace GitHubReleaser
             this.latestCommitsTab.ResumeLayout(false);
             this.latestCommitsTab.PerformLayout();
             this.buildReleaseTab.ResumeLayout(false);
+            this.buildReleaseTab.PerformLayout();
             this.publishToGithubTab.ResumeLayout(false);
+            this.publishToGithubTab.PerformLayout();
             this.restartDropboxTab.ResumeLayout(false);
             this.finalGb.ResumeLayout(false);
             this.finalGb.PerformLayout();
@@ -464,6 +496,8 @@ namespace GitHubReleaser
         private System.Windows.Forms.Button stopDropboxBtn;
         private System.Windows.Forms.TabPage restartDropboxTab;
         private System.Windows.Forms.Button restartDropboxBtn;
+        private System.Windows.Forms.CheckBox publishPreReleaseCb;
+        private System.Windows.Forms.TextBox buildReleaseOutputTb;
     }
 }
 

@@ -270,6 +270,12 @@ namespace GitHubReleaser
 		List<string> zipFiles = new();
 
 		#region Tab: Build Release
+		private void buildLog(string s)
+		{
+			if (!string.IsNullOrWhiteSpace(s))
+				s = $"{DateTime.Now}: {s}";
+			buildReleaseOutputTb.AppendText(s + Environment.NewLine);
+		}
 		private async void buildReleaseBtn_Click(object sender, EventArgs e)
 		{
 			if (string.IsNullOrWhiteSpace(finalVersionTb.Text))
@@ -278,20 +284,43 @@ namespace GitHubReleaser
 				return;
 			}
 
-			var success = await buildRelease();
-			if (!success)
-				throw new Exception("Build release timed out");
+			try
+			{
+				buildReleaseBtn.Enabled = false;
+				buildReleaseOutputTb.Clear();
 
-			var ver = finalVersionTb.Text.Trim('v');
-			var verDirs = selectedProject.RenameReleaseDirectories(ver).ToList();
+				buildLog("Begin build");
 
-			zipRelease(verDirs);
+				var success = await buildRelease();
+				if (!success)
+					throw new Exception("Build release timed out");
+
+				buildLog("build steps complete. Begin zip");
+
+				var ver = finalVersionTb.Text.Trim('v');
+				var verDirs = selectedProject.RenameReleaseDirectories(ver).ToList();
+
+				zipRelease(verDirs);
+
+				buildLog("Build success");
+			}
+			catch (Exception ex)
+			{
+				buildLog("ERROR");
+				buildLog(ex.Message);
+				buildLog(ex.StackTrace);
+			}
+			finally
+			{
+				buildReleaseBtn.Enabled = true;
+			}
 		}
 
 		private async Task<bool> buildRelease()
 		{
 			var start = DateTime.Now;
-			await selectedProject.BuildAsync();
+
+			await selectedProject.BuildAsync(buildLog);
 
 			// overkill. should take < 30 sec
 			var _2_minute_Timeout = new TimeSpan(0, 2, 0);
@@ -326,6 +355,8 @@ namespace GitHubReleaser
 		#endregion Tab: Build Release
 
 		#region Tab: Publish to github
+		private void publishPreReleaseCb_CheckedChanged(object sender, EventArgs e) => this.finalTitleTb.Text += " - Pre-release";
+
 		private async void publishBtn_Click(object sender, EventArgs e)
 		{
 			ArgumentValidator.EnsureNotNullOrWhiteSpace(finalVersionTb.Text, nameof(finalVersionTb));
@@ -346,13 +377,17 @@ namespace GitHubReleaser
 			{
 				Name = finalTitleTb.Text,
 				Body = finalBodyTb.Text,
-				Draft = true
+				Draft = true,
+				Prerelease = publishPreReleaseCb.Checked
 			};
 			var release = await gitHubRepository.Release.Create(repoId, newRelease);
 
 			// upload IN ORDER. don't do something clever which doesn't guarantee order
 			foreach (var zipPath in zipFiles)
 				await uploadZipAsync(release, zipPath);
+
+			finalZipTb.Text = "";
+			warningsLbl.Text = "Publish success";
 		}
 
 		private async Task uploadZipAsync(Octokit.Release release, string zipPath)
@@ -391,6 +426,6 @@ namespace GitHubReleaser
 				.Wait(_30_second_Timeout);
 			// completedSuccessfully is always false. thread terminate though
 		}
-		#endregion
+        #endregion
 	}
 }

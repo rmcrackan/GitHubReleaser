@@ -135,36 +135,34 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 ".Trim();
 		}
 
-		string buildDebug;
-		public override async Task BuildAsync()
+		Action<string> logMe;
+		public override async Task BuildAsync(Action<string> outputCallback)
 		{
-			buildDebug = "";
+			logMe = outputCallback;
+
 			foreach (var r in releases)
 			{
-				buildDebug += $@"{r.OS}|{r.LibationExe}" + Environment.NewLine;
+				logMe($@"{r.OS}|{r.LibationExe}");
 
 				await runDotNetAsync("clean -c Release");
 
 				foreach (var project in r.Projects)
 				{
-					buildDebug += $"* project:{project}" + Environment.NewLine;
+					logMe($"* project:{project}");
 
 					var csproj = $@"{project}\{project}.csproj";
 					var pubxml = $@"{project}\Properties\PublishProfiles\{r.OS.Name}Profile.pubxml";
 
 					await runDotNetAsync($"publish -c Release -o {r.GetPublishDirRelative()} {csproj} -p:PublishProfile={pubxml}");
-
-					buildDebug += Environment.NewLine;
 				}
 
-				buildDebug += Environment.NewLine;
+				logMe("");
 			}
-			var debugFinal = buildDebug;
 		}
 
 		private async Task runDotNetAsync(string args)
 		{
-			buildDebug += $@"  {args}" + Environment.NewLine;
+			logMe($@"  {args}");
 			await Runner.RunHiddenAsync(new ProcessStartInfo
 			{
 				FileName = "dotnet",

@@ -31,7 +31,7 @@ namespace GitHubReleaser
 		public ProjectSettings(string displayName) : base(i++, displayName) { }
 
 		// default: solution-level build
-		public virtual async Task BuildAsync()
+		public virtual async Task BuildAsync(Action<string> outputCallback)
 			=> await Runner.RunHiddenAsync(
 				@"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe",
 				$@"  ""{Solution}"" /build ""Release|AnyCPU""  ".Trim());
