@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.XPath;
 using Dinah.Core;
-using Dinah.Core.Processes;
+using Dinah.Core.WindowsDesktop;
+using Dinah.Core.WindowsDesktop.Processes;
 
 namespace GitHubReleaser
 {
     public partial class Form1 : Form
 	{
-		private WindowsService dropboxWindowsService { get; } = new WindowsService("DbxSvc");
-		private WindowsProgram dropboxDesktop { get; } = new WindowsProgram(@"C:\Program Files (x86)\Dropbox\Client\Dropbox.exe");
+		private Service dropboxWindowsService { get; } = new("DbxSvc");
+		private Executable dropboxDesktop { get; } = new(@"C:\Program Files (x86)\Dropbox\Client\Dropbox.exe");
 
 		Octokit.IRepositoriesClient gitHubRepository;
 		long repoId;

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dinah.Core;
-using Dinah.Core.Processes;
+using Dinah.Core.WindowsDesktop.Processes;
 
 namespace GitHubReleaser
 {
@@ -32,7 +32,7 @@ namespace GitHubReleaser
 
 		// default: solution-level build
 		public virtual async Task BuildAsync()
-			=> await ProcessRunner.RunHiddenAsync(
+			=> await Runner.RunHiddenAsync(
 				@"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe",
 				$@"  ""{Solution}"" /build ""Release|AnyCPU""  ".Trim());
 

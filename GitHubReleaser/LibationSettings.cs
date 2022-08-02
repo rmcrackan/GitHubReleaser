@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dinah.Core;
-using Dinah.Core.Processes;
+using Dinah.Core.WindowsDesktop.Processes;
 
 namespace GitHubReleaser
 {
@@ -165,7 +165,7 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 		private async Task runDotNetAsync(string args)
 		{
 			buildDebug += $@"  {args}" + Environment.NewLine;
-			await ProcessRunner.RunHiddenAsync(new ProcessStartInfo
+			await Runner.RunHiddenAsync(new ProcessStartInfo
 			{
 				FileName = "dotnet",
 				WorkingDirectory = SourceDirectory,
