@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace GitHubReleaser
+namespace GitHubReleaser.XstitchXcel
 {
 	internal class XstitchXcelSettings : ProjectSettings
 	{

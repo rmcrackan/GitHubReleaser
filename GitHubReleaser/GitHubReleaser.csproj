@@ -13,4 +13,10 @@
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Form1.*.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
