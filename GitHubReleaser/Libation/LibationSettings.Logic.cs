@@ -30,7 +30,8 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 		{
 			logMe = outputCallback;
 
-			foreach (var r in releases)
+            logMe("");
+            foreach (var r in releases)
 			{
 				logMe($@"{r.OS}|{r.MainExe}");
 
