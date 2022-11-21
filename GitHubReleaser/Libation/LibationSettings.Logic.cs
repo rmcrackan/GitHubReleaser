@@ -56,7 +56,7 @@ I intend to keep Libation free and open source, but if you want to [leave a tip]
 		private async Task runDotNetAsync(string args)
 		{
 			logMe($@"  {args}");
-			await Runner.RunHiddenAsync(new ProcessStartInfo
+			await Runner.RunHiddenAsync(new()
 			{
 				FileName = "dotnet",
 				WorkingDirectory = SourceDirectory,

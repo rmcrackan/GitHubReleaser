@@ -25,8 +25,7 @@ namespace GitHubReleaser.Libation
 		public string Dir => $@"{SubDir}\{ProjDir}".Trim('\\');
 
         private static int i = 0;
-		public Project(string csProj) : this(csProj, csProj) { }
-        protected Project(string csProj, string name) : base(i++, csProj)
+		protected Project(string csProj, string name = null) : base(i++, csProj)
         {
             CsProj = ArgumentValidator.EnsureNotNullOrEmpty(csProj, nameof(csProj));
 			Name = string.IsNullOrWhiteSpace(name) ? csProj : name;
