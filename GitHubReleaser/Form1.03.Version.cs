@@ -47,8 +47,7 @@ namespace GitHubReleaser
         private async Task<Version> getLastPublishedVersionAsync()
         {
             // https://octokitnet.readthedocs.io/en/latest/releases/
-            var releases = await gitHubRepository.Release.GetAll("rmcrackan", selectedProject.Name);
-            var latest = releases.First(r => !r.Draft && !r.Prerelease);
+            var latest = await gitHubRepository.Release.GetLatest("rmcrackan", selectedProject.Name);
             var latestVersionString = latest.TagName.Trim('v');
             return Version.Parse(latestVersionString);
         }

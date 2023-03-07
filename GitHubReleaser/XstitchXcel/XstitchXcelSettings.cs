@@ -29,12 +29,10 @@ As long as I'm maintaining this software, it will remain free and open source., 
 			ReleaseIsComplete = () =>
 			{
 				var exe = Path.Combine(ReleaseDirectory, "XstitchXcel.exe");
-				var spanishDir = Path.Combine(ReleaseDirectory, "es");
 
 				return
 					File.Exists(exe) &&
-					Directory.Exists(spanishDir) &&
-					Directory.EnumerateFiles(spanishDir).Count() > 16;
+					Directory.EnumerateFiles(ReleaseDirectory).Count() > 200;
 			};
 		}
 	}
