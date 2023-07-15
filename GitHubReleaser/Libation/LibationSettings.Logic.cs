@@ -19,7 +19,7 @@ namespace GitHubReleaser.Libation
 			Footer =
 				"\r\n\r\n" +
 				@$"
-[Libation](https://github.com/rmcrackan/Libation) is a free, open source audible library manager for Windows. Decrypt, backup, organize, and search your audible library
+[Libation](https://github.com/rmcrackan/Libation) is a free, open source audible library manager. Decrypt, backup, organize, and search your audible library
 
 I intend to keep Libation free and open source, but if you want to [leave a tip](https://paypal.me/MBucari?locale.x=en_us), who am I to argue?
 ".Trim();
