@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dinah.Core" Version="9.0.2.1" />
-    <PackageReference Include="Dinah.Core.WindowsDesktop" Version="9.0.1.1" />
+    <PackageReference Include="Dinah.Core.WindowsDesktop" Version="9.0.2.1" />
     <PackageReference Include="Octokit" Version="14.0.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.8" />
   </ItemGroup>
