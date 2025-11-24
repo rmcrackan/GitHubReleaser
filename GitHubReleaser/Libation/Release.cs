@@ -11,7 +11,7 @@ namespace GitHubReleaser.Libation
         public string BuildPrefix { get; init; } = "";
 
         /// <summary>order matters. First project is main/LibationExe</summary>
-        public List<Project> Projects { get; init; } = new();
+        public List<Project> Projects { get; init; } = [];
         /// <summary>LibationExe</summary>
         public Project MainExe => Projects.FirstOrDefault();
     }

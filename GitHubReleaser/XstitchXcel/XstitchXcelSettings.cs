@@ -9,7 +9,7 @@ namespace GitHubReleaser.XstitchXcel
 	{
 		public XstitchXcelSettings() : base("XstitchXcel")
 		{
-			GitDirectory = Path.Combine(SECRETS.VS2022ProjectsDirectory, Name);
+			GitDirectory = Path.Combine(SECRETS.VS2026ProjectsDirectory, Name);
 			SourceDirectory = GitDirectory;
 
 			ProjectWithVersion = Path.Combine(SourceDirectory, @"XstitchXcel\XstitchXcel.csproj");

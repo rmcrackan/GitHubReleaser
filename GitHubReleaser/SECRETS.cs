@@ -6,7 +6,7 @@ namespace GitHubReleaser
 {
 	public class SECRETS
 	{
-		public static string VS2022ProjectsDirectory { get; }
+		public static string VS2026ProjectsDirectory { get; }
 		public static string GithubApiToken { get; }
 
 		static SECRETS()
@@ -27,7 +27,7 @@ namespace GitHubReleaser
 			}
 
 			var json = File.ReadAllText(Path.Combine(dirInfo.FullName, __SECRETS, "secrets.json"));
-			VS2022ProjectsDirectory = JObject.Parse(json)["vs_2022_projects_directory"].Value<string>();
+			VS2026ProjectsDirectory = JObject.Parse(json)["vs_2026_projects_directory"].Value<string>();
 			GithubApiToken = JObject.Parse(json)["github_api_token"].Value<string>();
 		}
 	}
