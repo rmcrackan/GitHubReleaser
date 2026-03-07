@@ -22,6 +22,8 @@ namespace GitHubReleaser
 
             finalBodyTb.Clear();
 
+            finalBodyTb.AppendText(selectedProject.Header);
+
             addCommitMessages(latestTag);
 
             var contributors = await findContributors(latestTag);
@@ -54,6 +56,7 @@ namespace GitHubReleaser
                 {
                     if (!name.Trim().EqualsInsensitive("Robert McRackan") &&
                         !name.Trim().EqualsInsensitive("rmcrackan") &&
+                        !name.Trim().EqualsInsensitive("dependabot") &&
                         !contributors.Contains(name))
                         contributors.Add(name);
                 }

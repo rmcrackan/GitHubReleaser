@@ -17,6 +17,7 @@ namespace GitHubReleaser.XstitchXcel
 			ReleaseDirectory = Path.Combine(SourceDirectory, @"XstitchXcel\bin\Release");
 			VersionDirectory = Path.Combine(SourceDirectory, @"XstitchXcel\bin\XstitchXcel."); // final dot IS intentional
 
+			Header = "";
 			Footer =
 				"\r\n\r\n" +
 				@$"

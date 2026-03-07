@@ -25,8 +25,9 @@ namespace GitHubReleaser
 		public string ReleaseDirectory { get; init; }
 		public string VersionDirectory { get; init; }
 
-		public string Footer { get; init; }
-		public Func<bool> ReleaseIsComplete = () => true;
+        public string Header { get; init; }
+        public string Footer { get; init; }
+        public Func<bool> ReleaseIsComplete = () => true;
 
 		private static int i = 0;
 		public ProjectSettings(string displayName) : base(i++, displayName) { }

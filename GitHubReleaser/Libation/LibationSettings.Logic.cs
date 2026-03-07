@@ -16,12 +16,21 @@ namespace GitHubReleaser.Libation
 			SourceDirectory = Path.Combine(GitDirectory, "Source");
 			ProjectWithVersion = Path.Combine(SourceDirectory, @"AppScaffolding\AppScaffolding.csproj");
 
+			Header =
+                @$"
+<!-- BEGIN NO-APP -->
+> <a href=""https://getlibation.com""><img src="".github/download-icon.svg"" width=""20"" height=""20"" alt="""" /></a> **[Which version should I download?](https://getlibation.com)** — get a recommended download for your system on our site.
+<!-- END NO-APP -->
+".Trim() +
+                "\r\n\r\n";
 			Footer =
 				"\r\n\r\n" +
 				@$"
+<!-- BEGIN NO-APP -->
 [Libation](https://github.com/rmcrackan/Libation) is a free, open source audible library manager. Decrypt, backup, organize, and search your audible library
 
 I intend to keep Libation free and open source, but if you want to [leave a tip](https://paypal.me/mcrackan?locale.x=en_us), who am I to argue?
+<!-- END NO-APP -->
 ".Trim();
 		}
 
