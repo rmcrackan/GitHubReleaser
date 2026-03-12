@@ -56,7 +56,7 @@ namespace GitHubReleaser
                 {
                     if (!name.Trim().EqualsInsensitive("Robert McRackan") &&
                         !name.Trim().EqualsInsensitive("rmcrackan") &&
-                        !name.Trim().EqualsInsensitive("dependabot") &&
+                        !name.Trim().EqualsInsensitive("dependabot[bot]") &&
                         !contributors.Contains(name))
                         contributors.Add(name);
                 }
