@@ -13,10 +13,12 @@ namespace GitHubReleaser
             if (!latestCommitsTab.Visible)
                 return;
 
-            // fetch new tags which were created on github
+            // ensure local repo has commits that may only exist on the remote
             git.RunGitCommand("fetch");
 
-            var latestTag = git.GetLatestTag();
+            // use GitHub's latest release tag (same source as the Version tab), not git describe.
+            // describe can pick up a newer local/remote tag that is not a published release.
+            var latestTag = await getLastPublishedTagAsync();
 
             tagLbl.Text = latestTag;
 
@@ -34,12 +36,11 @@ namespace GitHubReleaser
 
         private void addCommitMessages(string latestTag)
         {
-            var commitMessages = git.GetCommitsSinceTag(latestTag);
+            var lines = git.GetCommitsSinceTag(latestTag)
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 
-            if (commitMessages.Any())
-                finalBodyTb.AppendText(commitMessages.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(s => $"* {s}")
-                    .Aggregate((a, b) => $"{a}\r\n{b}"));
+            if (lines.Length > 0)
+                finalBodyTb.AppendText(string.Join("\r\n", lines.Select(s => $"* {s}")));
         }
 
         private async Task<List<string>> findContributors(string latestTag)
@@ -48,7 +49,7 @@ namespace GitHubReleaser
             //   git log <yourlasttag>..HEAD
             // %H == commit hash. https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History
             var commitHashes = git.RunGitCommand($"git log --pretty=%H {latestTag}..HEAD").Output;
-            foreach (var hash in commitHashes.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var hash in commitHashes.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
             {
                 var commit = await gitHubRepository.Commit.Get(repoId, hash);
                 var name = commit?.Author?.Login ?? commit?.Commit?.Committer?.Name;
@@ -67,12 +68,10 @@ namespace GitHubReleaser
 
         private void addContributorsThankYou(List<string> contributors)
         {
-            if (contributors.Any())
+            if (contributors.Count > 0)
             {
                 finalBodyTb.AppendText("\r\n\r\nThanks to " +
-                    contributors
-                    .Select(s => $"@{s}")
-                    .Aggregate((a, b) => $"{a}, {b}"));
+                    string.Join(", ", contributors.Select(s => $"@{s}")));
             }
         }
     }

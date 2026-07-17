@@ -44,13 +44,18 @@ namespace GitHubReleaser
             }
         }
 
-        private async Task<Version> getLastPublishedVersionAsync()
-        {
-            // https://octokitnet.readthedocs.io/en/latest/releases/
-            var latest = await gitHubRepository.Release.GetLatest("rmcrackan", selectedProject.Name);
-            var latestVersionString = latest.TagName.Trim('v');
-            return Version.Parse(latestVersionString);
-        }
+		private async Task<Version> getLastPublishedVersionAsync()
+		{
+			var latestVersionString = (await getLastPublishedTagAsync()).Trim('v');
+			return Version.Parse(latestVersionString);
+		}
+
+		private async Task<string> getLastPublishedTagAsync()
+		{
+			// https://octokitnet.readthedocs.io/en/latest/releases/
+			var latest = await gitHubRepository.Release.GetLatest("rmcrackan", selectedProject.Name);
+			return latest.TagName;
+		}
 
         private Version getCurrentVersion()
         {
